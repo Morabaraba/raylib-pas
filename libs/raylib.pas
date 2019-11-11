@@ -86,7 +86,6 @@
 unit raylib;
 
 {$MODE ObjFpc}
-{$PACKRECORDS C}
 
 interface
 
@@ -372,6 +371,7 @@ type
 
   // Model type
   PModel = ^TModel;
+  {$PACKRECORDS C}
   TModel = record
     transform: TMatrix;
 
@@ -387,6 +387,7 @@ type
     bones : PBoneInfo;
     bindPose : PTransform;
   end;
+  {$PACKRECORDS default}
 
   // Model Animation
   PModelAnimation = ^TModelAnimation;
