@@ -1,8 +1,8 @@
-program core_2d_camara;
+program core_2d_camera;
 
 {$MODE objfpc}
 
-uses cmem, raylib, math;
+uses cmem, raylib, math, sysutils;
 
 const
   screenWidth = 800;
@@ -18,6 +18,8 @@ var
   v: TVector2;
   camera: TCamera2D;
   i: Integer;
+  play: boolean;
+  buildingMoveSpeed: integer;
 
 begin
   {$IFDEF DARWIN}
@@ -25,7 +27,8 @@ begin
   {$IFEND}
 
   InitWindow(screenWidth, screenHeight, 'raylib [core] example - 2d camera');
-
+  buildingMoveSpeed := 1;
+  play := False;
   player := RectangleCreate(400, 280, 40, 40);
 
   for i := 0 to MAX_BUILDINGS-1 do
@@ -52,6 +55,10 @@ begin
       player.x := player.x + 2
     else if IsKeyDown(KEY_LEFT) then
       player.x := player.x - 2;
+    if IsKeyDown(KEY_DOWN) then
+      player.y := player.y + 2
+    else if IsKeyDown(KEY_UP) then
+      player.y := player.y - 2;
 
     camera.target := Vector2Create(player.x + 20, player.y + 20);
 
@@ -76,6 +83,16 @@ begin
       camera.rotation := 0.0;
     end;
 
+    if IsKeyPressed(KEY_P) then
+    begin
+      play:= not play;
+    end;
+
+    if IsKeyDown(KEY_Z) then
+      buildingMoveSpeed:= buildingMoveSpeed - 1
+    else if IsKeyDown(KEY_X) then
+      buildingMoveSpeed:= buildingMoveSpeed + 1;
+
     BeginDrawing();
       ClearBackground(RAYWHITE);
       BeginMode2D(camera);
@@ -93,15 +110,30 @@ begin
       DrawRectangle(screenWidth - 5, 5, 5, screenHeight - 10, RED);
       DrawRectangle(0, screenHeight - 5, screenWidth, 5, RED);
 
-      DrawRectangle( 10, 10, 250, 113, Fade(SKYBLUE, 0.5));
-      DrawRectangleLines( 10, 10, 250, 113, BLUE);
+      DrawRectangle( 10, 10, 270, 155, Fade(SKYBLUE, 0.5));
+      DrawRectangleLines( 10, 10, 270, 155, BLUE);
 
       DrawText('Free 2d camera controls:', 20, 20, 10, BLACK);
       DrawText('- Right/Left to move Offset', 40, 40, 10, DARKGRAY);
       DrawText('- Mouse Wheel to Zoom in-out', 40, 60, 10, DARKGRAY);
       DrawText('- A / S to Rotate', 40, 80, 10, DARKGRAY);
       DrawText('- R to reset Zoom and Rotation', 40, 100, 10, DARKGRAY);
+      if play then
+        DrawText('- P to Stop', 40, 120, 10, DARKGRAY)
+      else
+        DrawText('- P to Play', 40, 120, 10, DARKGRAY);
+     DrawText(pchar(format('- Z / X to change building speed (atm %d)', [buildingMoveSpeed])), 40, 140, 10, DARKGRAY);
     EndDrawing;
+
+    if play then
+    for i := 0 to MAX_BUILDINGS-1 do
+    begin
+      buildings[i].x := buildings[i].x + buildingMoveSpeed;
+      if buildings[i].x < -6000 then
+        buildings[i].x := 6000;
+      if buildings[i].x > 6000 then
+        buildings[i].x := -6000;
+    end;
   end;
 
 
